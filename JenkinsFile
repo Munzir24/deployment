@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        ANSIBLE_INVENTORY = 'https://github.com/Munzir24/deployment/blob/master/hosts' // Assuming the inventory file is at the root of the repo
+        ANSIBLE_PLAYBOOK_PATH = 'https://github.com/Munzir24/deployment/tree/master' // Update this based on your repo structure
+        DEPLOY_PLAYBOOK = "${ANSIBLE_PLAYBOOK_PATH}/deploy-ci-cd.yaml"
+        CONFIGURE_PLAYBOOK = "${ANSIBLE_PLAYBOOK_PATH}/mytomcat.yaml"
+        GIT_REPO = 'https://github.com/Munzir24/deployment.git'
+    }
+
+    stages {
+        stage('Clone Ansible Code from GitHub') {
+            steps {
+                git url: "${GIT_REPO}"
+            }
+        }
+
+        stage('Configure Tomcat and Java on Dev Environment') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        playbook: "${CONFIGURE_PLAYBOOK}",
+                        extras: "-e 'hosts=dev'"
+                    )
+                }
+            }
+        }
+
+        stage('Configure Tomcat and Java on Prod Environment') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        playbook: "${CONFIGURE_PLAYBOOK}",
+                        extras: "-e 'hosts=prod'"
+                    )
+                }
+            }
+        }
+
+        stage('Deploy Application to Dev Environment') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        playbook: "${DEPLOY_PLAYBOOK}",
+                        extras: "-e 'hosts=dev'"
+                    )
+                }
+            }
+        }
+
+        stage('Deploy Application to Prod Environment') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        playbook: "${DEPLOY_PLAYBOOK}",
+                        extras: "-e 'hosts=prod'"
+                    )
+                }
+            }
+        }
+    }
+}
