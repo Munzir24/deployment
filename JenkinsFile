@@ -10,8 +10,8 @@ pipeline {
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
         SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
-        NEXUS_USER = credentials('nexus-token')
-        NEXUS_PASSWORD = credentials('nexus-token')
+        NEXUS_USER = ('nexus-token')
+        NEXUS_PASSWORD = ('nexus-token')
     }
 
     stages {
