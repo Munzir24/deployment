@@ -4,17 +4,16 @@ pipeline {
     }
 
     environment {
-        ANSIBLE_INVENTORY = 'https://github.com/Munzir24/deployment/blob/master/hosts' // Assuming the inventory file is at the root of the repo
-        ANSIBLE_PLAYBOOK_PATH = 'https://github.com/Munzir24/deployment/tree/master' // Update this based on your repo structure
-        DEPLOY_PLAYBOOK = "${ANSIBLE_PLAYBOOK_PATH}/deploy-ci-cd.yaml"
-        CONFIGURE_PLAYBOOK = "${ANSIBLE_PLAYBOOK_PATH}/mytomcat.yaml"
+        ANSIBLE_INVENTORY = 'hosts' // Assuming the inventory file is at the root of the repo
+        CONFIGURE_PLAYBOOK = 'mytomcat.yaml' // Update this based on your repo structure
+        DEPLOY_PLAYBOOK = 'deploy-ci-cd.yaml' // Update this based on your repo structure
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
     }
 
     stages {
         stage('Clone Ansible Code from GitHub') {
             steps {
-                git url: "${GIT_REPO}"
+                git url: "${env.GIT_REPO}"
             }
         }
 
@@ -22,8 +21,8 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        playbook: "${CONFIGURE_PLAYBOOK}",
+                        playbook: "${env.CONFIGURE_PLAYBOOK}",
+                        inventory: "${env.ANSIBLE_INVENTORY}",
                         extras: "-e 'hosts=dev'"
                     )
                 }
@@ -34,8 +33,8 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        playbook: "${CONFIGURE_PLAYBOOK}",
+                        playbook: "${env.CONFIGURE_PLAYBOOK}",
+                        inventory: "${env.ANSIBLE_INVENTORY}",
                         extras: "-e 'hosts=prod'"
                     )
                 }
@@ -46,8 +45,8 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        playbook: "${DEPLOY_PLAYBOOK}",
+                        playbook: "${env.DEPLOY_PLAYBOOK}",
+                        inventory: "${env.ANSIBLE_INVENTORY}",
                         extras: "-e 'hosts=dev'"
                     )
                 }
@@ -58,8 +57,8 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        playbook: "${DEPLOY_PLAYBOOK}",
+                        playbook: "${env.DEPLOY_PLAYBOOK}",
+                        inventory: "${env.ANSIBLE_INVENTORY}",
                         extras: "-e 'hosts=prod'"
                     )
                 }
