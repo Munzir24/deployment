@@ -10,8 +10,6 @@ pipeline {
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
         SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
-        NEXUS_USER = ('nexus-token')
-        NEXUS_PASSWORD = ('nexus-token')
     }
 
     stages {
@@ -62,7 +60,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD}"
+                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -74,7 +72,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD}"
+                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
