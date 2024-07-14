@@ -13,6 +13,17 @@ pipeline {
     }
 
     stages {
+        stage('Install Python 3') {
+            steps {
+                sh '''
+                if ! command -v python3 &> /dev/null; then
+                    sudo yum install epel-release -y || sudo apt update
+                    sudo yum install python3 -y || sudo apt install python3 -y
+                fi
+                '''
+            }
+        }
+
         stage('Clone Ansible Code from GitHub') {
             steps {
                 git url: "${GIT_REPO}"
