@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Clone Ansible Code from GitHub') {
             steps {
-                git url: "${env.GIT_REPO}"
+                git url: "${GIT_REPO}"
             }
         }
 
@@ -21,9 +21,9 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        playbook: "${env.CONFIGURE_PLAYBOOK}",
-                        inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e 'hosts=dev'"
+                        playbook: "${CONFIGURE_PLAYBOOK}",
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        extras: "-e env=dev"
                     )
                 }
             }
@@ -33,9 +33,9 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        playbook: "${env.CONFIGURE_PLAYBOOK}",
-                        inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e 'hosts=prod'"
+                        playbook: "${CONFIGURE_PLAYBOOK}",
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        extras: "-e env=prod"
                     )
                 }
             }
@@ -45,9 +45,9 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        playbook: "${env.DEPLOY_PLAYBOOK}",
-                        inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e 'hosts=dev'"
+                        playbook: "${DEPLOY_PLAYBOOK}",
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        extras: "-e env=dev"
                     )
                 }
             }
@@ -57,9 +57,9 @@ pipeline {
             steps {
                 script {
                     ansiblePlaybook(
-                        playbook: "${env.DEPLOY_PLAYBOOK}",
-                        inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e 'hosts=prod'"
+                        playbook: "${DEPLOY_PLAYBOOK}",
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        extras: "-e env=prod"
                     )
                 }
             }
