@@ -10,7 +10,7 @@ pipeline {
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
         SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
-        VERSION = '0.12.17'
+        VERSION = '0.12.15'
     }
 
     stages {
