@@ -1,3 +1,12 @@
+- name: Ensure Python 3 is installed
+  yum:
+    name: python3
+    state: present
+
+- name: Ensure pip3 is installed
+  command: "python3 -m ensurepip"
+  when: ansible_facts.packages.pip3 is undefined
+
 - name: Installing Java
   yum:
     name: java-{{java_version}}-openjdk-devel
@@ -29,7 +38,7 @@
     src: tomcat-service.j2
     dest: /etc/systemd/system/tomcat-service.service
   notify:
-    - reload deamons
+    - reload daemons
     - restart tomcat
 
 - name: Enable tomcat service
@@ -71,4 +80,3 @@
     state: present
     executable: pip3
   when: lxml_check.rc != 0
-
