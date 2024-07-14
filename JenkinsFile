@@ -10,7 +10,6 @@ pipeline {
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
         SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
-        NEXUS_CREDENTIALS = credentials('nexus-token') // ID of the Jenkins credentials containing Nexus username and password
     }
 
     stages {
@@ -57,24 +56,28 @@ pipeline {
 
         stage('Deploy Application to Dev Environment') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        playbook: "${DEPLOY_PLAYBOOK}",
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev nexus_user=$NEXUS_CREDENTIALS_USR nexus_password=$NEXUS_CREDENTIALS_PSW ${ANSIBLE_EXTRA_ARGS}"
-                    )
+                withCredentials([usernamePassword(credentialsId: 'nexus-token', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
+                    script {
+                        ansiblePlaybook(
+                            playbook: "${DEPLOY_PLAYBOOK}",
+                            inventory: "${ANSIBLE_INVENTORY}",
+                            extras: "-e env=dev -e nexus_user=${NEXUS_USER} -e nexus_password=${NEXUS_PASSWORD} ${ANSIBLE_EXTRA_ARGS}"
+                        )
+                    }
                 }
             }
         }
 
         stage('Deploy Application to Prod Environment') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        playbook: "${DEPLOY_PLAYBOOK}",
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=prod nexus_user=$NEXUS_CREDENTIALS_USR nexus_password=$NEXUS_CREDENTIALS_PSW ${ANSIBLE_EXTRA_ARGS}"
-                    )
+                withCredentials([usernamePassword(credentialsId: 'nexus-token', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
+                    script {
+                        ansiblePlaybook(
+                            playbook: "${DEPLOY_PLAYBOOK}",
+                            inventory: "${ANSIBLE_INVENTORY}",
+                            extras: "-e env=prod -e nexus_user=${NEXUS_USER} -e nexus_password=${NEXUS_PASSWORD} ${ANSIBLE_EXTRA_ARGS}"
+                        )
+                    }
                 }
             }
         }
