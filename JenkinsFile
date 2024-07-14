@@ -2,94 +2,79 @@ pipeline {
     agent {
         label "slave1"
     }
+
     environment {
-        ANSIBLE_INVENTORY = 'hosts'
-        CONFIGURE_PLAYBOOK = 'mytomcat.yaml'
-        DEPLOY_PLAYBOOK = 'deploy-cicd.yaml'
+        ANSIBLE_INVENTORY = 'hosts' // Assuming the inventory file is at the root of the repo
+        CONFIGURE_PLAYBOOK = 'mytomcat.yaml' // Update this based on your repo structure
+        DEPLOY_PLAYBOOK = 'deploy-cicd.yaml' // Update this based on your repo structure
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
-        SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem'
+        SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
-        NEXUS_CREDENTIALS_ID = 'nexus-token' // ID of the Jenkins credentials containing Nexus username and password
+        NEXUS_CREDENTIALS = credentials('nexus-token') // ID of the Jenkins credentials containing Nexus username and password
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git url: "${GIT_REPO}"
-            }
-        }
-
         stage('Install Python 3') {
             steps {
                 sh '''
                 if ! command -v python3 &> /dev/null; then
-                  sudo yum install epel-release -y || sudo apt update
-                  sudo yum install python3 -y || sudo apt install python3 -y
+                    sudo yum install epel-release -y || sudo apt update
+                    sudo yum install python3 -y || sudo apt install python3 -y
                 fi
                 '''
             }
         }
 
-        stage('Configure Tomcat and Java on Dev') {
+        stage('Clone Ansible Code from GitHub') {
+            steps {
+                git url: "${GIT_REPO}"
+            }
+        }
+
+        stage('Configure Tomcat and Java on Dev Environment') {
             steps {
                 script {
                     ansiblePlaybook(
                         playbook: "${CONFIGURE_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extraVars: "-e env=dev",
-                        privateKey: "${SSH_KEY_PATH}"
+                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
         }
 
-        stage('Configure Tomcat and Java on Prod') {
+        stage('Configure Tomcat and Java on Prod Environment') {
             steps {
                 script {
                     ansiblePlaybook(
                         playbook: "${CONFIGURE_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extraVars: "-e env=prod",
-                        privateKey: "${SSH_KEY_PATH}"
+                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
         }
 
-        stage('Deploy to Dev') {
+        stage('Deploy Application to Dev Environment') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
-                    script {
-                        ansiblePlaybook(
-                            playbook: "${DEPLOY_PLAYBOOK}",
-                            inventory: "${ANSIBLE_INVENTORY}",
-                            extraVars: [
-                                env: 'dev',
-                                nexus_user: env.NEXUS_USER,
-                                nexus_password: env.NEXUS_PASSWORD
-                            ],
-                            privateKey: "${SSH_KEY_PATH}"
-                        )
-                    }
+                script {
+                    ansiblePlaybook(
+                        playbook: "${DEPLOY_PLAYBOOK}",
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        extras: "-e env=dev nexus_user=$NEXUS_CREDENTIALS_USR nexus_password=$NEXUS_CREDENTIALS_PSW ${ANSIBLE_EXTRA_ARGS}"
+                    )
                 }
             }
         }
 
-        stage('Deploy to Prod') {
+        stage('Deploy Application to Prod Environment') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
-                    script {
-                        ansiblePlaybook(
-                            playbook: "${DEPLOY_PLAYBOOK}",
-                            inventory: "${ANSIBLE_INVENTORY}",
-                            extraVars: [
-                                env: 'prod',
-                                nexus_user: env.NEXUS_USER,
-                                nexus_password: env.NEXUS_PASSWORD
-                            ],
-                            privateKey: "${SSH_KEY_PATH}"
-                        )
-                    }
+                script {
+                    ansiblePlaybook(
+                        playbook: "${DEPLOY_PLAYBOOK}",
+                        inventory: "${ANSIBLE_INVENTORY}",
+                        extras: "-e env=prod nexus_user=$NEXUS_CREDENTIALS_USR nexus_password=$NEXUS_CREDENTIALS_PSW ${ANSIBLE_EXTRA_ARGS}"
+                    )
                 }
             }
         }
