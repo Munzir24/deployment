@@ -8,6 +8,8 @@ pipeline {
         CONFIGURE_PLAYBOOK = 'mytomcat.yaml' // Update this based on your repo structure
         DEPLOY_PLAYBOOK = 'deploy-ci-cd.yaml' // Update this based on your repo structure
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
+        SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
+        ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
     }
 
     stages {
@@ -23,7 +25,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${CONFIGURE_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev"
+                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -35,7 +37,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${CONFIGURE_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=prod"
+                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -47,7 +49,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev"
+                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -59,7 +61,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=prod"
+                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
