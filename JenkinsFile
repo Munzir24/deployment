@@ -61,7 +61,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev nexus_user=${NEXUS_CREDENTIALS_USR} nexus_password=${NEXUS_CREDENTIALS_PSW} ${ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e env=dev nexus_user=${NEXUS_CREDENTIALS} nexus_password=${NEXUS_CREDENTIALS} ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
