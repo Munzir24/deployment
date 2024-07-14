@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label "slave1"
+    }
 
     environment {
         ANSIBLE_INVENTORY = 'https://github.com/Munzir24/deployment/blob/master/hosts' // Assuming the inventory file is at the root of the repo
