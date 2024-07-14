@@ -86,9 +86,11 @@ pipeline {
                                 nexus_password: env.NEXUS_PASSWORD
                             ],
                             privateKey: "${SSH_KEY_PATH}"
-                    )
+                        )
+                    }
                 }
             }
         }
     }
+}
 }
