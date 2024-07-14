@@ -6,7 +6,7 @@ pipeline {
     environment {
         ANSIBLE_INVENTORY = 'hosts' // Assuming the inventory file is at the root of the repo
         CONFIGURE_PLAYBOOK = 'mytomcat.yaml' // Update this based on your repo structure
-        DEPLOY_PLAYBOOK = 'deploy-ci-cd.yaml' // Update this based on your repo structure
+        DEPLOY_PLAYBOOK = 'deploy-cicd.yaml' // Update this based on your repo structure
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
         SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
