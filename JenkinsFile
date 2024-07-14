@@ -57,26 +57,35 @@ pipeline {
 
         stage('Deploy Application to Dev Environment') {
             steps {
-                /* groovylint-disable-next-line LineLength */
-                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')])
-                script {
-                    ansiblePlaybook(
-                        playbook: "${DEPLOY_PLAYBOOK}",
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev nexus_user=env.NEXUS_USER nexus_password=env.NEXUS_PASSWORD ${ANSIBLE_EXTRA_ARGS}"
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
+                    script {
+                        ansiblePlaybook(
+                            playbook: "${DEPLOY_PLAYBOOK}",
+                            inventory: "${ANSIBLE_INVENTORY}",
+                            extraVars: [
+                                env: 'dev',
+                                nexus_user: env.NEXUS_USER,
+                                nexus_password: env.NEXUS_PASSWORD
+                            ],
+                            privateKey: "${SSH_KEY_PATH}"
                     )
                 }
             }
         }
 
-        stage('Deploy Application to Prod Environment') {
+        stage('Deploy Application to Dev Environment') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')])
-                script {
-                    ansiblePlaybook(
-                        playbook: "${DEPLOY_PLAYBOOK}",
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=prod nexus_user=env.NEXUS_USER nexus_password=env.NEXUS_PASSWORD ${ANSIBLE_EXTRA_ARGS}"
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
+                    script {
+                        ansiblePlaybook(
+                            playbook: "${DEPLOY_PLAYBOOK}",
+                            inventory: "${ANSIBLE_INVENTORY}",
+                            extraVars: [
+                                env: 'dev',
+                                nexus_user: env.NEXUS_USER,
+                                nexus_password: env.NEXUS_PASSWORD
+                            ],
+                            privateKey: "${SSH_KEY_PATH}"
                     )
                 }
             }
