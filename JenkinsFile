@@ -1,6 +1,7 @@
 pipeline {
-    agent any
-
+    agent {
+        label "slave1"
+    }
     environment {
         ANSIBLE_INVENTORY = 'hosts'
         CONFIGURE_PLAYBOOK = 'mytomcat.yaml'
