@@ -2,8 +2,8 @@
   set_fact:
     ansible_python_interpreter: /usr/bin/python3
 
- - name: Install Python 3 and yum-utils
-   yum:
+- name: Install Python 3 and yum-utils
+  yum:
     name: 
       - python3
       - yum-utils
