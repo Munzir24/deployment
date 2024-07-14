@@ -57,12 +57,13 @@ pipeline {
 
         stage('Deploy Application to Dev Environment') {
             steps {
+                /* groovylint-disable-next-line LineLength */
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')])
                 script {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        credentialsId: "${NEXUS_CREDENTIALS_ID}",
-                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e env=dev nexus_user=env.NEXUS_USER nexus_password=env.NEXUS_PASSWORD ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -70,12 +71,12 @@ pipeline {
 
         stage('Deploy Application to Prod Environment') {
             steps {
+                withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')])
                 script {
                     ansiblePlaybook(
                         playbook: "${DEPLOY_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        credentialsId: "${NEXUS_CREDENTIALS_ID}",
-                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e env=prod nexus_user=env.NEXUS_USER nexus_password=env.NEXUS_PASSWORD ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
