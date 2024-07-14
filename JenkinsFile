@@ -3,6 +3,10 @@ pipeline {
         label "slave1"
     }
 
+    parameters {
+        string(name: 'VERSION', defaultValue: '0.12.17', description: 'Version of the artifact to be deployed')
+    }
+
     environment {
         ANSIBLE_INVENTORY = 'hosts' // Assuming the inventory file is at the root of the repo
         CONFIGURE_PLAYBOOK = 'mytomcat.yaml' // Update this based on your repo structure
@@ -10,7 +14,7 @@ pipeline {
         GIT_REPO = 'https://github.com/Munzir24/deployment.git'
         SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem' // Path to your private key on the Jenkins agent
         ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
-        VERSION = '0.12.17'
+        NEXUS_CREDENTIALS = credentials('nexus-token') // ID of the Jenkins credentials containing Nexus username and password
     }
 
     stages {
@@ -62,7 +66,7 @@ pipeline {
                         ansiblePlaybook(
                             playbook: "${DEPLOY_PLAYBOOK}",
                             inventory: "${ANSIBLE_INVENTORY}",
-                            extras: "-e env=dev -e version=${VERSION} -e nexus_user=${NEXUS_USER} -e nexus_password=${NEXUS_PASSWORD} ${ANSIBLE_EXTRA_ARGS}"
+                            extras: "-e \"env=dev nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION}\" ${ANSIBLE_EXTRA_ARGS}"
                         )
                     }
                 }
@@ -76,7 +80,7 @@ pipeline {
                         ansiblePlaybook(
                             playbook: "${DEPLOY_PLAYBOOK}",
                             inventory: "${ANSIBLE_INVENTORY}",
-                            extras: "-e env=prod version=${VERSION} -e nexus_user=${NEXUS_USER} -e nexus_password=${NEXUS_PASSWORD} ${ANSIBLE_EXTRA_ARGS}"
+                            extras: "-e \"env=prod nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION}\" ${ANSIBLE_EXTRA_ARGS}"
                         )
                     }
                 }
