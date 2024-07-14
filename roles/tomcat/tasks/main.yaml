@@ -1,5 +1,5 @@
 - name: Installing Java
-  yum:
+  dnf:
     name: java-{{java_version}}-openjdk-devel
     state: present
 
