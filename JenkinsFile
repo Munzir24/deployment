@@ -1,3 +1,4 @@
+
 pipeline {
     agent {
         label "slave1"
@@ -5,6 +6,7 @@ pipeline {
 
     parameters {
         string(name: 'VERSION', defaultValue: '0.12.17', description: 'Version of the artifact to be deployed')
+        choice(name: 'ENVIRONMENT', choices: ['dev','prod','SIT'], description: 'Environment to be deployed')
     }
 
     environment {
@@ -35,52 +37,25 @@ pipeline {
             }
         }
 
-        stage('Configure Tomcat and Java on Dev Environment') {
+        stage('Configure Tomcat and Java on desired Environment') {
             steps {
                 script {
                     ansiblePlaybook(
                         playbook: "${CONFIGURE_PLAYBOOK}",
                         inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=dev ${ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e env=${params.ENVIRONMENT} ${ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
         }
-
-        stage('Configure Tomcat and Java on Prod Environment') {
-            steps {
-                script {
-                    ansiblePlaybook(
-                        playbook: "${CONFIGURE_PLAYBOOK}",
-                        inventory: "${ANSIBLE_INVENTORY}",
-                        extras: "-e env=prod ${ANSIBLE_EXTRA_ARGS}"
-                    )
-                }
-            }
-        }
-
-        stage('Deploy Application to Dev Environment') {
+        stage('Deploy Application to desired Environment') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'nexus-token', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
                     script {
                         ansiblePlaybook(
                             playbook: "${DEPLOY_PLAYBOOK}",
                             inventory: "${ANSIBLE_INVENTORY}",
-                            extras: "-e \"env=dev nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION}\" ${ANSIBLE_EXTRA_ARGS}"
-                        )
-                    }
-                }
-            }
-        }
-
-        stage('Deploy Application to Prod Environment') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-token', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
-                    script {
-                        ansiblePlaybook(
-                            playbook: "${DEPLOY_PLAYBOOK}",
-                            inventory: "${ANSIBLE_INVENTORY}",
-                            extras: "-e \"env=prod nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION}\" ${ANSIBLE_EXTRA_ARGS}"
+                            extras: "-e \"env=${params.ENVIRONMENT} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION}\" ${ANSIBLE_EXTRA_ARGS}"
                         )
                     }
                 }
