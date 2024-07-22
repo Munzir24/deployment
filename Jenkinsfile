@@ -40,7 +40,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${env.CONFIGURE_PLAYBOOK}",
                         inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e env:${params.ENVIRONMENT} ${env.ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e env=${params.ENVIRONMENT} ${env.ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -52,7 +52,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${env.DEPLOY_PLAYBOOK}",
                         inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e \"env:${params.ENVIRONMENT} nexus_user:${NEXUS_USER} nexus_password:${NEXUS_PASSWORD} version:${params.VERSION} \" ${env.ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e \"env=${params.ENVIRONMENT} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION} \" ${env.ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
