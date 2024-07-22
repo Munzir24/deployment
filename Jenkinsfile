@@ -1,19 +1,19 @@
 pipeline {
     agent {
-        'slave1'
+        label "slave1"
     }
     parameters {
         string (name: 'VERSION', defaultValue: '0.0.0', description: 'Version to be deployed')
-        choice (name: 'ENVIRONMENT', choices ['dev','prod','SIT'], description: 'Environment on which to be deployed')
+        choice (name: 'ENVIRONMENT', choices: ['dev','prod','SIT'], description: 'Environment on which to be deployed')
     }
     environment {
-        ANSIBLE_INVENTORY: 'hosts'
-        CONFIGURE_PLAYBOOK: 'mytomcat.yaml'
-        DEPLOY_PLAYBOOK: 'deploy-cicd.yaml'
-        GIT_REPO: 'https://github.com/Munzir24/deployment.git'
-        SSH_KEY_PATH: '/home/ec2-user/.ssh/mykey.pem'
-        ANSIBLE_EXTRA_ARGS: "--private-key ${SSH_KEY_PATH}"
-        NEXUS_CREDENTIALS: credentials('nexus-token')
+        ANSIBLE_INVENTORY = 'hosts'
+        CONFIGURE_PLAYBOOK = 'mytomcat.yaml'
+        DEPLOY_PLAYBOOK = 'deploy-cicd.yaml'
+        GIT_REPO = 'https://github.com/Munzir24/deployment.git'
+        SSH_KEY_PATH = '/home/ec2-user/.ssh/mykey.pem'
+        ANSIBLE_EXTRA_ARGS = "--private-key ${SSH_KEY_PATH}"
+        NEXUS_CREDENTIALS = credentials('nexus-token')
     }
     stages {
         stage('Install Python3') {
@@ -40,7 +40,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${env.CONFIGURE_PLAYBOOK}",
                         inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e env=${params.ENVIRONMENT} ${env.ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e env:${params.ENVIRONMENT} ${env.ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
@@ -52,7 +52,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: "${env.DEPLOY_PLAYBOOK}",
                         inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e \"env=${params.ENVIRONMENT} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION} \" ${env.ANSIBLE_EXTRA_ARGS}"
+                        extras: "-e \"env:${params.ENVIRONMENT} nexus_user:${NEXUS_USER} nexus_password:${NEXUS_PASSWORD} version:${params.VERSION} \" ${env.ANSIBLE_EXTRA_ARGS}"
                     )
                 }
             }
