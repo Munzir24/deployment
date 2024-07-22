@@ -47,13 +47,14 @@ pipeline {
         }
         stage('Deploy Artifact to the desired environment') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-token', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')])
-                script {
-                    ansiblePlaybook(
-                        playbook: "${env.DEPLOY_PLAYBOOK}",
-                        inventory: "${env.ANSIBLE_INVENTORY}",
-                        extras: "-e \"env=${params.ENVIRONMENT} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION} \" ${env.ANSIBLE_EXTRA_ARGS}"
-                    )
+                withCredentials([usernamePassword(credentialsId: 'nexus-token', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USER')]) {
+                    script {
+                        ansiblePlaybook(
+                            playbook: "${env.DEPLOY_PLAYBOOK}",
+                            inventory: "${env.ANSIBLE_INVENTORY}",
+                            extras: "-e \"env=${params.ENVIRONMENT} nexus_user=${NEXUS_USER} nexus_password=${NEXUS_PASSWORD} version=${params.VERSION} \" ${env.ANSIBLE_EXTRA_ARGS}"
+                        )
+                    }                        
                 }
             }
         }
